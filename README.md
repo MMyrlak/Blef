@@ -2,29 +2,18 @@
 Blef to gra towarzyska online, w której jeden z graczy w każdej rundzie otrzymuje inne pytanie niż pozostali. Celem oszusta jest odpowiedzieć tak, by nie zostać wykrytym, a reszty – by go rozpoznać. Gra oparta jest na blefowaniu, dedukcji i głosowaniu.
 
 ⚙️ Funkcje
-🔗 Tworzenie lobby i dołączanie przez link
-
-🎮 Dowolna liczba graczy w lobby
-
-🧠 Losowanie pytań – inne dla oszusta
-
-✍️ Wpisywanie odpowiedzi
-
-✅ Przejście dalej tylko po wpisaniu odpowiedzi przez wszystkich
-
-🗳️ Głosowanie na oszusta (z opóźnieniem – dopiero po kliknięciu „gotowy” przez wszystkich)
-
-🧾 Automatyczne przyznawanie punktów:
-
-osoby, które zgadną – dostają punkt
-
-oszust dostaje tyle punktów, ilu graczy się pomyliło
-
-📊 Tablica wyników między rundami
-
-⏳ Odliczanie między rundami
-
-📦 Dane przechowywane w bazie (MySQL)
+  🔗 Tworzenie lobby i dołączanie przez link
+  🎮 Dowolna liczba graczy w lobby
+  🧠 Losowanie pytań – inne dla oszusta
+  ✍️ Wpisywanie odpowiedzi
+  ✅ Przejście dalej tylko po wpisaniu odpowiedzi przez wszystkich
+  🗳️ Głosowanie na oszusta (z opóźnieniem – dopiero po kliknięciu „gotowy” przez wszystkich)
+  🧾 Automatyczne przyznawanie punktów:
+    osoby, które zgadną – dostają punkt
+    oszust dostaje tyle punktów, ilu graczy się pomyliło
+  📊 Tablica wyników między rundami
+  ⏳ Odliczanie między rundami
+  📦 Dane przechowywane w bazie (MySQL)
 
 🛠 Stack technologiczny
 Frontend: React + Socket.IO Client + React Router
