@@ -34,7 +34,7 @@
 ### 1. Backend
 
 ```bash
-cd backend
+cd server
 npm install
 node index.js
 ```
@@ -42,7 +42,7 @@ node index.js
 ### 2. Frontend
 
 ```bash
-cd frontend
+cd client
 npm install
 npm start
 ```
@@ -57,10 +57,10 @@ npm start
 
 ```
 blef/
-├── backend/              # Serwer z Socket.IO i bazą danych
+├── server/              # Serwer z Socket.IO i bazą danych
 │   ├── index.js
 │   └── routes/
-├── frontend/             # Klient React
+├── client/             # Klient React
 │   ├── App.jsx
 │   ├── JoinLobbyPage.jsx
 │   ├── LobbyRoom.jsx
