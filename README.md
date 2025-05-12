@@ -92,14 +92,6 @@ https://blefgame.com/lobby/123e4567-e89b-12d3-a456-426614174000
 
 ## 📌 W planach
 
-- Czat w lobby i podczas gry
-- Tryb turniejowy
 - Edytor własnych pytań
-- Publiczne i prywatne lobby
 - Tłumaczenia językowe
 
----
-
-## 🧪 Przykładowe dane
-
-W repozytorium dostępny jest plik z 100 parami pytań do bazy danych (`questions.sql`).
