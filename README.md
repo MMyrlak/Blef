@@ -1,70 +1,105 @@
-🎭 Blef – Gra przeglądarkowa z blefem i głosowaniem
-Blef to gra towarzyska online, w której jeden z graczy w każdej rundzie otrzymuje inne pytanie niż pozostali. Celem oszusta jest odpowiedzieć tak, by nie zostać wykrytym, a reszty – by go rozpoznać. Gra oparta jest na blefowaniu, dedukcji i głosowaniu.
+# 🎭 Blef
 
-⚙️ Funkcje
-  - 🔗 Tworzenie lobby i dołączanie przez link 
-  - 🎮 Dowolna liczba graczy w lobby 
-  - 🧠 Losowanie pytań – inne dla oszusta 
-  - ✍️ Wpisywanie odpowiedzi 
-  - ✅ Przejście dalej tylko po wpisaniu odpowiedzi przez wszystkich
-  - 🗳️ Głosowanie na oszusta (z opóźnieniem – dopiero po kliknięciu „gotowy” przez wszystkich)
-  - 🧾 Automatyczne przyznawanie punktów:
-    - osoby, które zgadną – dostają punkt
-    - oszust dostaje tyle punktów, ilu graczy się pomyliło
-  - 📊 Tablica wyników między rundami
-  - ⏳ Odliczanie między rundami
-  - 📦 Dane przechowywane w bazie (MySQL)
+**Blef** to przeglądarkowa gra towarzyska oparta na blefie i głosowaniu. Gracze odpowiadają na pytania i próbują wskazać, kto z nich dostał inne pytanie – czyli jest oszustem. Gra stawia na spryt, dedukcję i dobrą zabawę w gronie znajomych.
 
-🛠 Stack technologiczny
-- Frontend: **React + Socket.IO Client + React Router**
-- Backend: **Node.js + Express + Socket.IO + MySQL**
-- Baza danych: **MySQL (łatwa do wdrożenia na większości hostingów)**
+---
 
-▶️ Uruchomienie lokalnie
-1. Backend
-bash
-Kopiuj
-Edytuj
+## 🔗 Funkcje
+
+- Tworzenie lobby i dołączanie przez link
+- Dowolna liczba graczy w pokoju
+- Hasła zabezpieczające lobby (opcjonalnie)
+- Losowanie pytań – jedno inne dla oszusta
+- Wpisywanie odpowiedzi przez wszystkich graczy
+- Przejście do głosowania po zakończeniu wpisywania przez wszystkich
+- Opóźnione ujawnianie głosów po kliknięciu "gotowy"
+- Automatyczne przyznawanie punktów:
+  - Gracze zgadujący trafnie – punkt
+  - Oszust – tyle punktów, ilu graczy się pomyliło
+- Tablica wyników między rundami z odliczaniem do kolejnej
+- Backend z Socket.IO i MySQL
+
+---
+
+## 🧱 Stack technologiczny
+
+- **Frontend:** React, React Router, Socket.IO Client
+- **Backend:** Node.js, Express, Socket.IO
+- **Baza danych:** MySQL
+
+---
+
+## ▶️ Uruchomienie lokalnie
+
+### 1. Backend
+
+```bash
 cd backend
 npm install
 node index.js
-Domyślnie uruchamia się na http://localhost:3001.
+```
 
-2. Frontend
-bash
-Kopiuj
-Edytuj
+### 2. Frontend
+
+```bash
 cd frontend
 npm install
 npm start
-Domyślnie uruchamia się na http://localhost:3000.
+```
 
-📂 Struktura katalogów
-bash
-Kopiuj
-Edytuj
+> Domyślnie:
+> - Backend: `http://localhost:3001`
+> - Frontend: `http://localhost:3000`
+
+---
+
+## 📁 Struktura katalogów
+
+```
 blef/
-├── backend/
-│   └── index.js          # Serwer z socket.io i endpointami
-├── frontend/
-│   ├── App.jsx           # Główne trasy
-│   ├── JoinLobbyPage.jsx # Dołączanie do lobby przez link
-│   └── LobbyRoom.jsx     # Główne lobby z listą graczy
-🔒 Dołączanie do gry
-Gracze mogą dołączać do lobby przez link, np.:
+├── backend/              # Serwer z Socket.IO i bazą danych
+│   ├── index.js
+│   └── routes/
+├── frontend/             # Klient React
+│   ├── App.jsx
+│   ├── JoinLobbyPage.jsx
+│   ├── LobbyRoom.jsx
+│   └── ...
+```
 
-arduino
-Kopiuj
-Edytuj
+---
+
+## 🔐 Dołączanie do gry
+
+Gracze mogą dołączać przez link np.:
+
+```
 https://blefgame.com/lobby/123e4567-e89b-12d3-a456-426614174000
-📌 W planach
-🔤 Tłumaczenie UI na różne języki
+```
 
-💬 Czat w grze
+---
 
-📱 Wersja mobilna
+## 🧠 Jak działa gra
 
-🧩 Edytor własnych pytań
+- W każdej rundzie losowana jest para pytań (dla graczy i dla oszusta).
+- Wszyscy wpisują odpowiedzi na swoje pytania.
+- Po kliknięciu "gotowy" przez wszystkich – przejście do głosowania.
+- Po kliknięciu "gotowy" na ekranie głosowania – ujawnienie głosów i oszusta.
+- System przyznaje punkty.
+- Wyświetlana jest tablica wyników z odliczaniem do nowej rundy.
 
-👤 Autor
-Projekt tworzony z myślą o łatwej, interaktywnej zabawie ze znajomymi – inspirowany grami typu Impostor i Spyfall.
+---
+
+## 📌 W planach
+
+- Czat w lobby i podczas gry
+- Tryb turniejowy
+- Edytor własnych pytań
+- Publiczne i prywatne lobby
+- Tłumaczenia językowe
+
+---
+
+## 🧪 Przykładowe dane
+
+W repozytorium dostępny jest plik z 100 parami pytań do bazy danych (`questions.sql`).
