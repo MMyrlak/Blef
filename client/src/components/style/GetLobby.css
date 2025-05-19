@@ -1,0 +1,17 @@
+.LobbyCointainer{
+    width: 50%;
+    height: 100%;
+    margin: 5% auto ;
+    padding: 1%;
+    border-radius: 24px;
+}
+.LobbyCointainer-Header{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+.LobbyCointainer-Center {
+    text-align: center;
+}
