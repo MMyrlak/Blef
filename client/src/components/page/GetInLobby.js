@@ -1,34 +1,24 @@
-import '../style/GetLobby.css';
-import '../style/Global.css';
-import React, { useState } from 'react';
+import '../style/GameLobby.css';
+import React, { useEffect, useState } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@chakra-ui/react"
-import { useNavigate } from 'react-router-dom';
 import { Input } from '@chakra-ui/react';
-import axios from 'axios';
 
-function GetLobby() {
+function GetInLobby() {
+  const { lobbyId } = useParams();
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleCreateLobby = async () => {
+    const handleGetInLobby = async () => {
         if(!nickname.trim()) {
           setError('Podaj nick');
           return;
         }
         setError(null);
-
-        try {
-          const res = await axios.post('http://localhost:3001/api/lobby/create', {
-            name: nickname
-          });
-          const {lobbyId} = res.data;
-          navigate(`/lobby/${lobbyId}`, {state: {nickname, lobbyId} });
-        } catch (err) {
-           console.error(err);
-           setError(err.response?.data?.error || "Błąd serwera Front");
-        }
-    }
+        
+        navigate(`/lobby/${lobbyId}`, {state: {nickname, lobbyId} });
+      }
   return (
 
     <div className='LobbyCointainer'>
@@ -41,10 +31,10 @@ function GetLobby() {
       {error && <p className='Error'>{error}</p>}
       <Input className='Body-Input fonts' placeholder='Podaj nick' variant="flushed" value={nickname} onChange={e => setNickname(e.target.value)}></Input>
       </div>
-      <Button variant="outline" className='fonts' onClick={handleCreateLobby}> Zacznij grę </Button>
+      <Button variant="outline" className='fonts' onClick={handleGetInLobby}> Dołącz do gry </Button>
       </div>
     </div>
   );
 }
 
-export default GetLobby;
+export default GetInLobby;

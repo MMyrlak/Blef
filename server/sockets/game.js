@@ -1,9 +1,15 @@
 const db = require('../db/connection');
 const activeGames = new Map();
 
+function timestamp() {
+  const now = new Date();
+  const d = n => String(n).padStart(2, '0');
+  return `${d(now.getDate())}/${d(now.getMonth()+1)} ${d(now.getHours())}:${d(now.getMinutes())}:${d(now.getSeconds())}`;
+}
+
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log('Połączono użytkownika o id: ', socket.id);
+        console.log(`Połączono użytkownika o id: ${socket.id} o godzinie ${timestamp()}`);
 
         socket.on('joinLobby', ({lobbyId, nickname}) => {
             socket.join(lobbyId);
@@ -21,17 +27,54 @@ module.exports = (io) => {
             }
 
             const game = activeGames.get(lobbyId);
-            const isHost = game.players.length === 0;
-            game.players.push({id: socket.id, nickname, score: 0, isHost});
+
+            const rejoining = game.players.find(p => p.nickname === nickname && !p.connected);
+            if (rejoining) {
+            rejoining.id = socket.id;
+            rejoining.connected = true;
+            rejoining.disconnectedAt = null;
+            socket.join(lobbyId);
+            socket.emit('playerInfo', { ...rejoining, lobbyId });
             io.to(lobbyId).emit('playerUpdate', game.players);
+            return;
+            }
+
+            const isHost = game.players.length === 0;
+            let player = game.players.find(p => p.id === socket.id);
+            if (!player) {
+            player = {
+                id: socket.id,
+                nickname,
+                connected: true,
+                isHost,
+                score: 0
+            };
+            game.players.push(player);
+            }
+            socket.emit('playerInfo', {
+            lobbyId: lobbyId,
+            playerId: player.id,
+            nickname: player.nickname,
+            isHost: player.isHost
+            });
+            console.log("NewPlayer: ",player);
+            console.log("Gracze: ",game.players);
+            console.log("Socket.io id gracza: ",socket.id);
+            const activePlayers = game.players.filter(p => p.id !== null);
+            io.to(lobbyId).emit('playerUpdate', activePlayers);
         });
 
-        socket.on('disconnect', ()=>{
+        socket.on('disconnect', () => {
             for (let [lobbyId, game] of activeGames) {
-                game.players = game.players.filter(p=> p.id !== socket.id);
-                io.to(lobbyId).emit('playersUpdate', game.players);
+                const disconnectedPlayer = game.players.find(p => p.id === socket.id);
+                if (disconnectedPlayer) {
+                    disconnectedPlayer.connected = false;
+                    disconnectedPlayer.disconnectedAt = Date.now();
+                    disconnectedPlayer.id = null;
+                    io.to(lobbyId).emit('playerUpdate', game.players);
+                }
             }
-        })
+        });
 
         socket.on('startRound', async ({lobbyId}) => {
             const game = activeGames.get(lobbyId);
@@ -55,10 +98,10 @@ module.exports = (io) => {
             } while (game.usedQuestionPair.includes(pairId))
             
             game.usedQuestionPair.push(pairId);
-
+            console.log("Id pary pytań: ",pairId)
             // pobranie pytania
             const [questions] = await db.query('SELECT * FROM question_pair WHERE pair_id = ?', [pairId]);
-
+            console.log("Pytania: ",questions);
             const questionForAll = questions.find(q=> q.for_impostor === 0);
             const questionForImpostor = questions.find(q=> q.for_impostor === 1);
 
@@ -90,10 +133,11 @@ module.exports = (io) => {
                 playerAnswer
             });
 
-            if(game.answer.length === game.players.length) {
-                const shuffled = game.answer.sort(()=> 0.5 - Math.random());
+            console.log("Odpowiedzi graczy: ", game.answer);
+            const activePlayers = game.players.filter(p => p.id !== null);
+            if(game.answer.length === activePlayers.length) {
                 io.to(lobbyId).emit('startVoting', {
-                    shuffled,
+                    answers: game.answer,
                     gameStage: 'vote'
                     });
             }

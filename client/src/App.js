@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GetLobby from './components/page/GetLobby';
-import CreateLobby from './components/page/CreateLobby';
+import GameLobby from './components/page/GameLobby';
+import GetInLobby from './components/page/GetInLobby';
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<GetLobby />} />
-        <Route path="/createLobby" element={<CreateLobby />} />
+        <Route path="/lobby/:lobbyId" element={<GameLobby />} />
+        <Route path='/getIn/:lobbyId' element={<GetInLobby />} />
       </Routes>
     </Router>
   );

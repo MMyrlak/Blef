@@ -1,0 +1,12 @@
+@font-face {
+  font-family: Cartoon;
+  src: url(PlaypenSansHebrew-VariableFont_wght.ttf);
+}
+
+.fonts{
+    font-family: Cartoon;   
+}
+
+.light{
+  background-color: rgb(247, 247, 247);
+}

@@ -1,17 +1,97 @@
-.LobbyCointainer{
-    width: 50%;
-    height: 100%;
-    margin: 5% auto ;
-    padding: 1%;
-    border-radius: 24px;
+@property --gradient-angle{
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
 }
-.LobbyCointainer-Header{
+.LobbyCointainer{
+    width: 50vw;
+    height: 36vh;
+    margin: 5% auto ;
+    padding: 0px 15px;
+    border-radius: 1rem;
+    aspect-ratio: 1/1.5;
+    position: relative;
+    background: rgb(228, 228, 228);
+}
+.LobbyCointainer::after, .LobbyCointainer::before{
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+    border-radius: inherit;
+    z-index: -1;
+    background: conic-gradient(
+        from var(--gradient-angle),
+        #e1eec3,
+        #f05053,
+        #e1eec3,
+        #f05053,
+        #e1eec3
+    );
+     animation: rotation 15s linear infinite;
+}
+.LobbyCointainer::after{
+    filter: blur(3.5rem);
+}
+@keyframes rotation {
+    0% {--gradient-angle: 0deg;}
+    100% {--gradient-angle: 360deg;}
+}
+.Header{
     width: 100%;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.Header h1{
+    font-size: 70px;
+    text-transform: uppercase;
+    letter-spacing: -3px;
+    transition: 700ms ease;
+    font-variation-settings: "wght" 311;
+    margin-bottom: -25px;
+    outline: none;
+    text-align: center;
+    color: #f05053;
+    animation: text-animation 3s infinite;
+    
+}
+@keyframes text-animation {
+  0%, 100% {
+    font-variation-settings: "wght" 311;
+    letter-spacing: -3px;
+  }
+  50% {
+    font-variation-settings: "wght" 582;
+    letter-spacing: 1px;
+  }
+}
+.Header p{
+    font-size: 1.1em;
+    text-align: center;
+    letter-spacing: .5px;
+    color: #f8787a;
+}
+.Body {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    margin-top: 20px;
     align-items: center;
     justify-content: space-around;
-    margin-bottom: 30px;
 }
-.LobbyCointainer-Center {
-    text-align: center;
+.Body-Input{
+    width: 100%;
+}
+.Body-Input-Container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.Error{
+    font-size: 15px;
+    margin-top: -4px;
+    font-weight: 200;
+    text-transform: lowercase;
+    color: #f05053;
 }

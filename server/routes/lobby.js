@@ -3,9 +3,6 @@ const router = express.Router();
 const db = require('../db/connection');
 
 router.post('/create', async (req, res) => {
-    const { name, password, isOpen } = req.body;
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-
     let id;
     let isUnique = false;
 
@@ -17,7 +14,7 @@ router.post('/create', async (req, res) => {
         }
     }
 
-    await db.execute('INSERT INTO lobbies (id, name, password_hash, isOpen) VALUES (?, ?, ?, ?)', [id, name, passwordHash, isOpen]);
+    await db.execute('INSERT INTO lobbies (id, isOpen) VALUES (?, 1)', [id]);
     res.json({ lobbyId: id });
 });
 
