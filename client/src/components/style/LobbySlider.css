@@ -1,0 +1,58 @@
+.swiper {
+  width: 60%;
+  height: 75vh;
+}
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 5%;
+  border-radius: 18px;
+  border: 3px solid #2e2e2e ;
+  color: #2e2e2e;
+  background-color: #beae97;
+  background-image: url('../img/CardBG.jpg');
+  background-size: cover;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.slider-body{
+    width: 100%;
+    height: 100%;
+    margin: 1%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .slider-body h1{
+      font-size: 36px;
+  }
+.slider-body p{
+    font-size: 24px;
+}
+.slider-body img{
+    width: 60%;
+}
+.SliderImg{
+  margin-top: -10%;
+  min-width: 80%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .swiper{
+    width: 100%;
+    height: 55vh;
+  }
+  .slider-body h1{
+      font-size: 24px;
+  }
+  .slider-body p{
+    font-size: 16px;
+    margin: 0 2%;
+  }
+
+}

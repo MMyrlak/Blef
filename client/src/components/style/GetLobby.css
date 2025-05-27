@@ -1,61 +1,71 @@
-@property --gradient-angle{
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-}
-.LobbyCointainer{
-    width: 50vw;
-    height: 36vh;
-    margin: 5% auto ;
+.LobbyCointainer {
+    width: 90vw;
+    height: 90vh;
+    margin: 2% auto;
     padding: 0px 15px;
-    border-radius: 1rem;
-    aspect-ratio: 1/1.5;
+    background-color: #cccccc;
+    background: url("../img/Background.jpg") center/cover no-repeat;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border: 5px solid #a77c4d;
+    border-radius: 12px;
+    box-shadow:
+        0 0 0 4px #d2b48c inset,
+        3px 6px 12px rgba(0, 0, 0, 0.3);
     position: relative;
-    background: rgb(228, 228, 228);
 }
-.LobbyCointainer::after, .LobbyCointainer::before{
-    content: "";
-    position: absolute;
-    inset: -0.5rem;
-    border-radius: inherit;
-    z-index: -1;
-    background: conic-gradient(
-        from var(--gradient-angle),
-        #e1eec3,
-        #f05053,
-        #e1eec3,
-        #f05053,
-        #e1eec3
-    );
-     animation: rotation 15s linear infinite;
+
+.LobbyCointainer-left, .LobbyCointainer-right {
+    width: 47%;
 }
-.LobbyCointainer::after{
-    filter: blur(3.5rem);
+
+.LobbyCointainer-left {
+    height: 100%;
+    padding: 3%;
 }
-@keyframes rotation {
-    0% {--gradient-angle: 0deg;}
-    100% {--gradient-angle: 360deg;}
+
+.Poster {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-image: url("../img/Poster.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    padding: 1% 10% 10% 10%;
 }
-.Header{
+
+.Poster img {
+    width: 55%;
+    height: 55%;
+    margin-bottom: -5%;
+}
+
+.Header {
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
-.Header h1{
-    font-size: 70px;
+
+.Header h1 {
+    font-size: 7vw;
     text-transform: uppercase;
     letter-spacing: -3px;
     transition: 700ms ease;
     font-variation-settings: "wght" 311;
-    margin-bottom: -25px;
+    margin-bottom: -10%;
     outline: none;
     text-align: center;
-    color: #f05053;
+    color: #8b0000;
     animation: text-animation 3s infinite;
-    
 }
+
 @keyframes text-animation {
   0%, 100% {
     font-variation-settings: "wght" 311;
@@ -66,12 +76,16 @@
     letter-spacing: 1px;
   }
 }
-.Header p{
-    font-size: 1.1em;
+
+.Header p {
+    font-size: 1.5vw;
     text-align: center;
-    letter-spacing: .5px;
-    color: #f8787a;
+    letter-spacing: .1px;
+    color: #8b0000;
+    text-transform: uppercase;
+    border-radius: 20px;
 }
+
 .Body {
     display: flex;
     width: 100%;
@@ -80,18 +94,81 @@
     align-items: center;
     justify-content: space-around;
 }
-.Body-Input{
+
+.Body-Input {
     width: 100%;
+    color: #941f1f;
+    font-size: 20px;
 }
-.Body-Input-Container{
+
+.Body-Input::placeholder {
+    color: #e28081;
+}
+
+.Body-Input-Container {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
 }
-.Error{
+
+.Error {
     font-size: 15px;
     margin-top: -4px;
     font-weight: 200;
     text-transform: lowercase;
     color: #f05053;
+}
+
+
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto !important;
+    }
+    .LobbyCointainer {
+        flex-direction: column;
+        height: auto;
+        padding: 8px;
+    }
+
+    .LobbyCointainer-left, .LobbyCointainer-right {
+        width: 100%;
+        height: 60vh;
+        padding: 10px 0;
+    }
+    .LobbyCointainer-right{
+        margin-top: 20%;
+    }
+    .Poster {
+        justify-content: space-around;
+        background-size: cover;
+        background-size: 100% 100%;
+        height: 115%;
+        width: 100%;
+        padding: 2.5% 5% 2.5% 5%;
+    }
+    .Poster img {
+        width: 70%;
+        height: auto;
+        margin-bottom: -50px;
+    }
+
+    .Header h1 {
+        font-size: 10vw;
+        letter-spacing: -1px;
+        margin-bottom: 5px;
+    }
+
+    .Header p {
+        font-size: 3.5vw;
+    }
+
+    .Body {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .Body-Input {
+        font-size: 16px;
+    }
 }

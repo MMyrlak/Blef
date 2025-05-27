@@ -1,12 +1,22 @@
 @font-face {
-  font-family: Cartoon;
-  src: url(PlaypenSansHebrew-VariableFont_wght.ttf);
+  font-family: Sancreek;
+  src: url(Sancreek-Regular.ttf);
+}
+
+body{
+  overflow-y: hidden;
 }
 
 .fonts{
-    font-family: Cartoon;   
+    font-family: Sancreek;   
 }
 
-.light{
-  background-color: rgb(247, 247, 247);
+.light, .dark{
+  background-color: #5a3e2b;
+  margin: 0;
+  background-image: url('../img/BodyBG.jpg');
+  background-size: cover;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 }

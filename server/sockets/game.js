@@ -9,7 +9,6 @@ function timestamp() {
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log(`Połączono użytkownika o id: ${socket.id} o godzinie ${timestamp()}`);
 
         socket.on('joinLobby', ({lobbyId, nickname}) => {
             socket.join(lobbyId);
@@ -42,12 +41,20 @@ module.exports = (io) => {
             const isHost = game.players.length === 0;
             let player = game.players.find(p => p.id === socket.id);
             if (!player) {
+            const usedCardIds = new Set(game.players.map(p => p.playerCardId).filter(id => id !== undefined));
+
+            let playerCardId;
+            do {
+                playerCardId = Math.floor(Math.random() * 32) + 1; // losuj z 1–32
+            } while (usedCardIds.has(playerCardId));
+
             player = {
                 id: socket.id,
                 nickname,
                 connected: true,
                 isHost,
-                score: 0
+                score: 0,
+                playerCardId
             };
             game.players.push(player);
             }
@@ -55,13 +62,14 @@ module.exports = (io) => {
             lobbyId: lobbyId,
             playerId: player.id,
             nickname: player.nickname,
-            isHost: player.isHost
+            isHost: player.isHost,
+            playerCardId: player.playerCardId
             });
-            console.log("NewPlayer: ",player);
-            console.log("Gracze: ",game.players);
-            console.log("Socket.io id gracza: ",socket.id);
+
             const activePlayers = game.players.filter(p => p.id !== null);
+           
             io.to(lobbyId).emit('playerUpdate', activePlayers);
+            io.to(lobbyId).emit('stageUpdate', game.stage);
         });
 
         socket.on('disconnect', () => {
@@ -71,7 +79,8 @@ module.exports = (io) => {
                     disconnectedPlayer.connected = false;
                     disconnectedPlayer.disconnectedAt = Date.now();
                     disconnectedPlayer.id = null;
-                    io.to(lobbyId).emit('playerUpdate', game.players);
+                    const activePlayers = game.players.filter(p => p.id !== null);
+                    io.to(lobbyId).emit('playerUpdate', activePlayers);
                 }
             }
         });
@@ -93,18 +102,17 @@ module.exports = (io) => {
             let pairId;
 
             do {
-                const [row] = await db.query('SELECT pair_id FROM question_pair ORDER BY RAND() LIMIT 1');
-                pairId = row[0]?.id;
+                const [row] = await db.query('SELECT pair_id FROM question_pairs ORDER BY RAND() LIMIT 1');
+                
+                pairId = row[0]?.pair_id;
             } while (game.usedQuestionPair.includes(pairId))
             
             game.usedQuestionPair.push(pairId);
-            console.log("Id pary pytań: ",pairId)
             // pobranie pytania
-            const [questions] = await db.query('SELECT * FROM question_pair WHERE pair_id = ?', [pairId]);
-            console.log("Pytania: ",questions);
+            const [questions] = await db.query('SELECT * FROM question_pairs WHERE pair_id = ?', [pairId]);
             const questionForAll = questions.find(q=> q.for_impostor === 0);
             const questionForImpostor = questions.find(q=> q.for_impostor === 1);
-
+            game.stage = "question";
             //wyślij pytanie
             for(const player of game.players) {
                 const question = player.id === game.impostorId ? questionForImpostor.content : questionForAll.content;
@@ -112,34 +120,40 @@ module.exports = (io) => {
                     question
                 });
             };
-
+            game.stage = 'question';
             io.to(lobbyId).emit('roundStarted', {
                 round: ++game.round,
-                players: game.players,
-                gameStage: 'question'
-            })
+                players: game.players
+            });
+            io.to(lobbyId).emit('stageUpdate', game.stage);
         })
 
-        socket.on('sendAnswer', ({lobbyId, playerAnswer}) => {
+        socket.on('sendAnswer', ({ lobbyId, playerAnswer }) => {
             const game = activeGames.get(lobbyId);
-            if(!game) return;
+            if (!game) return;
 
             const player = game.players.find(p => p.id === socket.id);
             if (!player) return;
 
-            game.answer.push({
-                playerId: socket.id,
-                nickname: player.nickname,
-                playerAnswer
-            });
+            const existingAnswerIndex = game.answer.findIndex(a => a.playerId === socket.id);
 
-            console.log("Odpowiedzi graczy: ", game.answer);
+            if (existingAnswerIndex !== -1) {
+                game.answer[existingAnswerIndex].playerAnswer = playerAnswer;
+            } else {
+                game.answer.push({
+                    playerId: socket.id,
+                    nickname: player.nickname,
+                    playerAnswer
+                });
+            }
+
             const activePlayers = game.players.filter(p => p.id !== null);
-            if(game.answer.length === activePlayers.length) {
+            if (game.answer.length === activePlayers.length) {
+                game.stage = 'vote';
                 io.to(lobbyId).emit('startVoting', {
-                    answers: game.answer,
-                    gameStage: 'vote'
-                    });
+                    answers: game.answer
+                });
+                io.to(lobbyId).emit('stageUpdate', game.stage);
             }
         });
 
@@ -164,9 +178,9 @@ module.exports = (io) => {
                 }
                 const impostorPlayer = game.players.find(p => p.id === impostor);
                 if (impostorPlayer) { impostorPlayer.score += impostor_points}
-                
+                game.stage = 'result';
                 io.to(lobbyId).emit('roundResult', {
-                    gameStage: 'result',
+                    gameStage: game.stage,
                     votes: game.votes,
                     impostor: impostor,
                     scores: game.player.map(p => ({
@@ -178,17 +192,55 @@ module.exports = (io) => {
             };
         });
 
-        socket.on('nextRoundReady', ({lobbyId}) => {
+        socket.on('nextRoundReady', async ({ lobbyId }) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
 
             game.readyNext = game.readyNext || new Set();
             game.readyNext.add(socket.id);
 
-            if(game.readyNext.size === game.players.length) {
+            const activePlayers = game.players.filter(p => p.id !== null);
+
+            if (game.readyNext.size === activePlayers.length) {
                 game.readyNext.clear();
-                io.to(lobbyId).emit('prepareNextRound');
+                game.stage = 'nextRound';
+
+                game.answer = [];
+                game.votes = [];
+
+                const randomIndex = Math.floor(Math.random() * activePlayers.length);
+                const impostor = activePlayers[randomIndex];
+                game.impostorId = impostor.id;
+
+                let pairId;
+                let row, questions;
+
+                do {
+                    [row] = await db.query('SELECT pair_id FROM question_pair ORDER BY RAND() LIMIT 1');
+                    pairId = row[0]?.pair_id;
+                } while (game.usedQuestionPair.includes(pairId));
+
+                game.usedQuestionPair.push(pairId);
+
+                [questions] = await db.query('SELECT * FROM question_pair WHERE pair_id = ?', [pairId]);
+                const questionForAll = questions.find(q => q.for_impostor === 0);
+                const questionForImpostor = questions.find(q => q.for_impostor === 1);
+
+                game.stage = 'question';
+                for (const player of activePlayers) {
+                    const question = player.id === game.impostorId ? questionForImpostor.content : questionForAll.content;
+                    io.to(player.id).emit('question', {
+                        question,
+                        gameStage: game.stage
+                    });
+                }
+
+                io.to(lobbyId).emit('roundStarted', {
+                    round: ++game.round,
+                    players: activePlayers,
+                    gameStage: game.stage
+                });
             }
-        })
+        });
     })
 }
