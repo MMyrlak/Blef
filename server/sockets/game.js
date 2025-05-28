@@ -1,12 +1,6 @@
 const db = require('../db/connection');
 const activeGames = new Map();
 
-function timestamp() {
-  const now = new Date();
-  const d = n => String(n).padStart(2, '0');
-  return `${d(now.getDate())}/${d(now.getMonth()+1)} ${d(now.getHours())}:${d(now.getMinutes())}:${d(now.getSeconds())}`;
-}
-
 module.exports = (io) => {
     io.on('connection', (socket) => {
 
@@ -20,7 +14,6 @@ module.exports = (io) => {
                     impostorId: null,
                     usedQuestionPair: [], 
                     isHost: false,
-                    round: 0,
                     stage: 'lobby',
                 });
             }
@@ -34,7 +27,8 @@ module.exports = (io) => {
             rejoining.disconnectedAt = null;
             socket.join(lobbyId);
             socket.emit('playerInfo', { ...rejoining, lobbyId });
-            io.to(lobbyId).emit('playerUpdate', game.players);
+            const activePlayers = game.players.filter(p => p.id !== null);
+            io.to(lobbyId).emit('playerUpdate', activePlayers);
             return;
             }
 
@@ -100,7 +94,6 @@ module.exports = (io) => {
 
             //losowanie nie używanej pary pytań 
             let pairId;
-
             do {
                 const [row] = await db.query('SELECT pair_id FROM question_pairs ORDER BY RAND() LIMIT 1');
                 
@@ -121,10 +114,6 @@ module.exports = (io) => {
                 });
             };
             game.stage = 'question';
-            io.to(lobbyId).emit('roundStarted', {
-                round: ++game.round,
-                players: game.players
-            });
             io.to(lobbyId).emit('stageUpdate', game.stage);
         })
 
