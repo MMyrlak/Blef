@@ -1,12 +1,6 @@
 const db = require('../db/connection');
 const activeGames = new Map();
 
-function timestamp() {
-  const now = new Date();
-  const d = n => String(n).padStart(2, '0');
-  return `${d(now.getDate())}/${d(now.getMonth()+1)} ${d(now.getHours())}:${d(now.getMinutes())}:${d(now.getSeconds())}`;
-}
-
 module.exports = (io) => {
     io.on('connection', (socket) => {
 
@@ -20,7 +14,6 @@ module.exports = (io) => {
                     impostorId: null,
                     usedQuestionPair: [], 
                     isHost: false,
-                    round: 0,
                     stage: 'lobby',
                 });
             }
@@ -34,7 +27,8 @@ module.exports = (io) => {
             rejoining.disconnectedAt = null;
             socket.join(lobbyId);
             socket.emit('playerInfo', { ...rejoining, lobbyId });
-            io.to(lobbyId).emit('playerUpdate', game.players);
+            const activePlayers = game.players.filter(p => p.id !== null);
+            io.to(lobbyId).emit('playerUpdate', activePlayers);
             return;
             }
 
@@ -100,29 +94,25 @@ module.exports = (io) => {
 
             //losowanie nie używanej pary pytań 
             let pairId;
-            let row;
-
             do {
-                [row] = await db.query('SELECT pair_id FROM question_pairs ORDER BY RAND() LIMIT 1');
+                const [row] = await db.query('SELECT pair_id FROM question_pairs ORDER BY RAND() LIMIT 1');
+                
                 pairId = row[0]?.pair_id;
-            } while (game.usedQuestionPair.includes(pairId));
-
+            } while (game.usedQuestionPair.includes(pairId))
+            
             game.usedQuestionPair.push(pairId);
             // pobranie pytania
             const [questions] = await db.query('SELECT * FROM question_pairs WHERE pair_id = ?', [pairId]);
             const questionForAll = questions.find(q=> q.for_impostor === 0);
             const questionForImpostor = questions.find(q=> q.for_impostor === 1);
+            game.stage = "question";
             //wyślij pytanie
             for(const player of game.players) {
-                const question = player.id === game.impostorId ? questionForImpostor.question : questionForAll.question;
-                io.to(player.id).emit('giveQuestion', {
+                const question = player.id === game.impostorId ? questionForImpostor.content : questionForAll.content;
+                io.to(player.id).emit('question', {
                     question
                 });
             };
-            io.to(lobbyId).emit('giveQuestions', {
-                questionForAll: questionForAll.question,
-                questionForImpostor: questionForImpostor.question
-            });
             game.stage = 'question';
             io.to(lobbyId).emit('stageUpdate', game.stage);
         })
@@ -130,6 +120,7 @@ module.exports = (io) => {
         socket.on('sendAnswer', ({ lobbyId, playerAnswer }) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
+
             const player = game.players.find(p => p.id === socket.id);
             if (!player) return;
 
@@ -144,7 +135,7 @@ module.exports = (io) => {
                     playerAnswer
                 });
             }
-            
+
             const activePlayers = game.players.filter(p => p.id !== null);
             if (game.answer.length === activePlayers.length) {
                 game.stage = 'vote';
@@ -159,56 +150,32 @@ module.exports = (io) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
 
-            const existingVoteIndex = game.votes.findIndex(v => v.voterId === socket.id);
-            if (existingVoteIndex !== -1) {
-                    // Zaktualizuj istniejący głos
-                    game.votes[existingVoteIndex].votedId = votedId;
-                } else {
-                    // Dodaj nowy głos
-                    game.votes.push({
-                        voterId: socket.id,
-                        votedId
-                    });
-                }
-            const activePlayers = game.players.filter(p => p.id !== null);
-            if( game.votes.length === activePlayers.length){
+            game.votes.push({
+                voterId: socket.id,
+                votedId
+            });
+            if( game.votes.length === game.players.length){
                 const impostor = game.impostorId;
-                let impostor_points = 0;
+                const impostor_points = 0;
                 // Punkty:
                 for (let player of game.players) {
-                    if (player.id === impostor) continue;
-                    const foundCorrectVote = game.votes.some(v => 
-                        v.voterId === player.id && v.votedId === impostor
-                    );
-                    if (foundCorrectVote) {
-                        player.score += 1; // Punkt za poprawne odgadnięcie
-                    } else {
+                    if (player.id !== impostor && game.votes.find(v => v.voterId === player.id && v.votedId === impostor)) {
+                        player.score += 1; // Odkrycie impostora
+                    } else if (player.id !== impostor) {
                         impostor_points++;
                     }
                 }
                 const impostorPlayer = game.players.find(p => p.id === impostor);
                 if (impostorPlayer) { impostorPlayer.score += impostor_points}
-
-                const votesWithNicknames = game.votes.map(vote => {
-                    const votedPlayer = game.players.find(p => p.id === vote.votedId);
-                    return {
-                        voterId: vote.voterId,
-                        votedId: vote.votedId,
-                        votedNickname: votedPlayer ? votedPlayer.nickname : "Unknown Player"
-                    };
-                });
-
-
                 game.stage = 'result';
-                io.to(lobbyId).emit('stageUpdate', game.stage);
                 io.to(lobbyId).emit('roundResult', {
-                    votes: votesWithNicknames,
+                    gameStage: game.stage,
+                    votes: game.votes,
                     impostor: impostor,
-                    scores: game.players.map(p => ({
+                    scores: game.player.map(p => ({
                         id: p.id,
                         nickname: p.nickname,
-                        score: p.score,
-                        playerCardId: p.playerCardId
+                        score: p.score
                     }))
                 })
             };
@@ -219,21 +186,49 @@ module.exports = (io) => {
             if (!game) return;
 
             game.readyNext = game.readyNext || new Set();
-                if (game.readyNext.has(socket.id)) {
-                // Jeśli jest, usuń go (cofnij gotowość)
-                game.readyNext.delete(socket.id);
-            } else {
-                // Jeśli nie ma, dodaj go (zgłoś gotowość)
-                game.readyNext.add(socket.id);
-            }
+            game.readyNext.add(socket.id);
 
             const activePlayers = game.players.filter(p => p.id !== null);
+
             if (game.readyNext.size === activePlayers.length) {
-                delete game.readyNext;
-                io.to(lobbyId).emit('clearLocalStorage');
-                game.stage = 'lobby';
-                io.to(lobbyId).emit('playerUpdate', activePlayers);
-                io.to(lobbyId).emit('stageUpdate', game.stage);
+                game.readyNext.clear();
+                game.stage = 'nextRound';
+
+                game.answer = [];
+                game.votes = [];
+
+                const randomIndex = Math.floor(Math.random() * activePlayers.length);
+                const impostor = activePlayers[randomIndex];
+                game.impostorId = impostor.id;
+
+                let pairId;
+                let row, questions;
+
+                do {
+                    [row] = await db.query('SELECT pair_id FROM question_pair ORDER BY RAND() LIMIT 1');
+                    pairId = row[0]?.pair_id;
+                } while (game.usedQuestionPair.includes(pairId));
+
+                game.usedQuestionPair.push(pairId);
+
+                [questions] = await db.query('SELECT * FROM question_pair WHERE pair_id = ?', [pairId]);
+                const questionForAll = questions.find(q => q.for_impostor === 0);
+                const questionForImpostor = questions.find(q => q.for_impostor === 1);
+
+                game.stage = 'question';
+                for (const player of activePlayers) {
+                    const question = player.id === game.impostorId ? questionForImpostor.content : questionForAll.content;
+                    io.to(player.id).emit('question', {
+                        question,
+                        gameStage: game.stage
+                    });
+                }
+
+                io.to(lobbyId).emit('roundStarted', {
+                    round: ++game.round,
+                    players: activePlayers,
+                    gameStage: game.stage
+                });
             }
         });
     })
