@@ -1,6 +1,6 @@
 .GameLobby {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #5a3e2b;
     background-image: url('../img/GameLobbyBG.jpg');
     background-size: cover;
@@ -21,11 +21,13 @@
     border-radius: 24px;
         border: 5px solid #a77c4d; /* kolor ramy */
     border-radius: 12px;
+    overflow: auto;
 }
 .GameLobby-Header{
     display: flex;
     flex-direction: row;
     align-items: center;
+    text-align: center;
     justify-content: space-around;
     padding: 1%;
     border: 5px solid #5a3e2b;
@@ -34,7 +36,8 @@
     background-color: rgba(255,255,255, 0.3);
 }
 .GameLobby-Header h1{
-    font-size: 250%;
+    font-size: 53px;
+    margin: -19px auto;
     
 }
 
@@ -63,6 +66,52 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
     width: 100%;
     gap: 16px;
+}
+.inviteButton {
+    font-size: 24px;
+    color: #836a19;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    border-color: #836a19;
+    background: linear-gradient(135deg, #f5e7c3 0%, #e6d2a5 100%);
+    border: 5px solid;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.startButton {
+    font-size: 24px;
+    color: #a52a2a;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    border-color: #a52a2a;
+    background: linear-gradient(135deg, #f5e7c3 0%, #d9c19f 100%);
+    border: 5px solid;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+@media (max-width: 768px) {
+    .GameLobby-Header h1{
+        font-size: 36px;
+        margin: 5px 0;
+    }
+    .GameLobby-Card {
+        margin-top: 20px;
+        padding-bottom: 120px;
+    }
+    .startButton, .inviteButton{
+        position: fixed; /* Zmiana z absolute na fixed */
+        z-index: 100;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        transition: bottom 0.3s ease; /* Animacja dla płynnego przesuwania */
+    }
+    .startButton {
+        bottom: 95px;
+    }
+    .inviteButton{
+        bottom: 50px
+    }
 }

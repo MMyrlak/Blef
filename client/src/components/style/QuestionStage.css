@@ -1,0 +1,46 @@
+.questionCard{
+    margin: 12px auto 0 auto;    
+    height: 400px;
+    width: 270px;
+    background-image: url('../img/AnswerCardBG.png');
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    text-align: center;
+    border-radius: 12px;
+    align-items: center;
+}
+.questionContainer{
+    width: 200px;
+    height: 120px;
+    margin: 35px 20px 19px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5px;
+}
+.questionCard h1 {
+    margin: 0;
+}
+.questionCard button {
+    width: 120px;
+    background-color: #4625238a;
+    color: antiquewhite;
+    font-size: 18px;
+}
+.questionCard textarea{
+    width: 210px;
+    height: 83px;
+    border: none;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+.sended{
+    box-shadow: 0 0 35px #c0c000; 
+    transform: scale(1.05);
+}

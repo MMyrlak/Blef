@@ -3,12 +3,20 @@
   src: url(Sancreek-Regular.ttf);
 }
 
+@font-face {
+  font-family: Roboto;
+  src: url(RobotoSlab-VariableFont_wght.ttf);
+}
+
 body{
   overflow-y: hidden;
 }
 
 .fonts{
     font-family: Sancreek;   
+}
+.robot{
+  font-family: Roboto;
 }
 
 .light, .dark{
