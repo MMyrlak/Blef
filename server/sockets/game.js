@@ -39,7 +39,7 @@ module.exports = (io) => {
 
             let playerCardId;
             do {
-                playerCardId = Math.floor(Math.random() * 32) + 1; // losuj z 1–32
+                playerCardId = Math.floor(Math.random() * 32) + 1;
             } while (usedCardIds.has(playerCardId));
 
             player = {
@@ -83,16 +83,13 @@ module.exports = (io) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
 
-            //reset rundy
             game.answer = [];
             game.votes = [];
             
-            // losowanie oszusta
             const randomIndex = Math.floor(Math.random() * game.players.length);
             const impostor = game.players[randomIndex];
             game.impostorId = impostor.id;
 
-            //losowanie nie używanej pary pytań 
             let pairId;
             let row;
 
@@ -102,11 +99,11 @@ module.exports = (io) => {
             } while (game.usedQuestionPair.includes(pairId));
 
             game.usedQuestionPair.push(pairId);
-            // pobranie pytania
+            
             const [questions] = await db.query('SELECT * FROM question_pairs WHERE pair_id = ?', [pairId]);
             const questionForAll = questions.find(q=> q.for_impostor === 0);
             const questionForImpostor = questions.find(q=> q.for_impostor === 1);
-            //wyślij pytanie
+            
             for(const player of game.players) {
                 const question = player.id === game.impostorId ? questionForImpostor.question : questionForAll.question;
                 io.to(player.id).emit('giveQuestion', {
@@ -155,10 +152,8 @@ module.exports = (io) => {
 
             const existingVoteIndex = game.votes.findIndex(v => v.voterId === socket.id);
             if (existingVoteIndex !== -1) {
-                    // Zaktualizuj istniejący głos
                     game.votes[existingVoteIndex].votedId = votedId;
                 } else {
-                    // Dodaj nowy głos
                     game.votes.push({
                         voterId: socket.id,
                         votedId
@@ -168,14 +163,13 @@ module.exports = (io) => {
             if( game.votes.length === activePlayers.length){
                 const impostor = game.impostorId;
                 let impostor_points = 0;
-                // Punkty:
                 for (let player of game.players) {
                     if (player.id === impostor) continue;
                     const foundCorrectVote = game.votes.some(v => 
                         v.voterId === player.id && v.votedId === impostor
                     );
                     if (foundCorrectVote) {
-                        player.score += 1; // Punkt za poprawne odgadnięcie
+                        player.score += 1;
                     } else {
                         impostor_points++;
                     }
@@ -214,10 +208,8 @@ module.exports = (io) => {
 
             game.readyNext = game.readyNext || new Set();
                 if (game.readyNext.has(socket.id)) {
-                // Jeśli jest, usuń go (cofnij gotowość)
                 game.readyNext.delete(socket.id);
             } else {
-                // Jeśli nie ma, dodaj go (zgłoś gotowość)
                 game.readyNext.add(socket.id);
             }
 

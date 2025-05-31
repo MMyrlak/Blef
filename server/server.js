@@ -1,15 +1,23 @@
 const express = require('express');
-const http = require('http');
+const fs = require("fs");
+const https = require('https');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const path = require("path");
 require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
+
+const keyPath = path.join(__dirname, "cert", "key.pem");
+const certPath = path.join(__dirname, "cert", "cert.pem");
+
+const key = fs.readFileSync(keyPath);
+const cert = fs.readFileSync(certPath);
+
+const server = https.createServer({ key, cert }, app);
 const io = new Server(server, { 
         cors: {
             origin: "*",
-            methods: ["GET", "POST"],
         }});
 
 app.use(cors());
