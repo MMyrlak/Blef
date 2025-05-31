@@ -25,7 +25,7 @@ function GetLobby() {
         setError(null);
 
         try {
-          const res = await axios.post('http://localhost:3001/api/lobby/create', {
+          const res = await axios.post('http://192.168.100.119:3001/api/lobby/create', {
             name: nickname
           });
           const {lobbyId} = res.data;

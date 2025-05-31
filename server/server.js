@@ -1,6 +1,5 @@
 const express = require('express');
-const fs = require("fs");
-const https = require('https');
+const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const path = require("path");
@@ -8,16 +7,11 @@ require('dotenv').config();
 
 const app = express();
 
-const keyPath = path.join(__dirname, "cert", "key.pem");
-const certPath = path.join(__dirname, "cert", "cert.pem");
-
-const key = fs.readFileSync(keyPath);
-const cert = fs.readFileSync(certPath);
-
-const server = https.createServer({ key, cert }, app);
+const server = http.createServer(app);
 const io = new Server(server, { 
         cors: {
             origin: "*",
+            methods: ["GET", "POST"]
         }});
 
 app.use(cors());
@@ -28,6 +22,6 @@ app.use('/api/lobby', require('./routes/lobby'));
 require('./sockets/game')(io);
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-    console.log(`Serwer nasłuchuje na ${PORT}`);
+server.listen(PORT,'0.0.0.0', () => {
+    console.log('Server running on http://192.168.100.119:3001');
 })
