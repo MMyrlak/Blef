@@ -88,7 +88,7 @@ module.exports = (io) => {
             
             const randomIndex = Math.floor(Math.random() * game.players.length);
             const impostor = game.players[randomIndex];
-            game.impostorId = impostor.id;
+            game.impostorNickname = impostor.nickname;
 
             let pairId;
             let row;
@@ -105,7 +105,7 @@ module.exports = (io) => {
             const questionForImpostor = questions.find(q=> q.for_impostor === 1);
             
             for(const player of game.players) {
-                const question = player.id === game.impostorId ? questionForImpostor.question : questionForAll.question;
+                const question = player.nickname === game.impostorNickname ? questionForImpostor.question : questionForAll.question;
                 io.to(player.id).emit('giveQuestion', {
                     question
                 });
@@ -121,13 +121,15 @@ module.exports = (io) => {
         socket.on('sendAnswer', ({ lobbyId, playerAnswer }) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
+
             const player = game.players.find(p => p.id === socket.id);
             if (!player) return;
 
-            const existingAnswerIndex = game.answer.findIndex(a => a.playerId === socket.id);
+            const existingAnswerIndex = game.answer.findIndex(a => a.nickname === player.nickname);
 
             if (existingAnswerIndex !== -1) {
                 game.answer[existingAnswerIndex].playerAnswer = playerAnswer;
+                game.answer[existingAnswerIndex].playerId = socket.id;
             } else {
                 game.answer.push({
                     playerId: socket.id,
@@ -146,27 +148,32 @@ module.exports = (io) => {
             }
         });
 
-        socket.on('sendVote', ({lobbyId, votedId}) => {
+        socket.on('sendVote', ({lobbyId, votedNickname }) => {
             const game = activeGames.get(lobbyId);
             if (!game) return;
 
-            const existingVoteIndex = game.votes.findIndex(v => v.voterId === socket.id);
+            const voterPlayer = game.players.find(p => p.id === socket.id);
+            if (!voterPlayer) return;
+            const voterNickname = voterPlayer.nickname;
+            const existingVoteIndex = game.votes.findIndex(v => v.voterNickname === voterNickname);
+    
             if (existingVoteIndex !== -1) {
-                    game.votes[existingVoteIndex].votedId = votedId;
+                    game.votes[existingVoteIndex].votedNickname = votedNickname;
                 } else {
                     game.votes.push({
-                        voterId: socket.id,
-                        votedId
+                        voterNickname: voterNickname,
+                        votedNickname: votedNickname
                     });
                 }
             const activePlayers = game.players.filter(p => p.id !== null);
             if( game.votes.length === activePlayers.length){
-                const impostor = game.impostorId;
+                const impostorNickname = game.impostorNickname;
                 let impostor_points = 0;
                 for (let player of game.players) {
-                    if (player.id === impostor) continue;
+                    if (player.nickname === impostorNickname) continue;
                     const foundCorrectVote = game.votes.some(v => 
-                        v.voterId === player.id && v.votedId === impostor
+                        v.voterNickname === player.nickname && 
+                        v.votedNickname === impostorNickname
                     );
                     if (foundCorrectVote) {
                         player.score += 1;
@@ -174,31 +181,21 @@ module.exports = (io) => {
                         impostor_points++;
                     }
                 }
-                const impostorPlayer = game.players.find(p => p.id === impostor);
-                if (impostorPlayer) { impostorPlayer.score += impostor_points}
-
-                const votesWithNicknames = game.votes.map(vote => {
-                    const votedPlayer = game.players.find(p => p.id === vote.votedId);
-                    return {
-                        voterId: vote.voterId,
-                        votedId: vote.votedId,
-                        votedNickname: votedPlayer ? votedPlayer.nickname : "Unknown Player"
-                    };
-                });
-
-
+                const impostorPlayer = game.players.find(p => p.nickname === impostorNickname);
+                if (impostorPlayer) {
+                    impostorPlayer.score += impostor_points;
+                }
                 game.stage = 'result';
                 io.to(lobbyId).emit('stageUpdate', game.stage);
                 io.to(lobbyId).emit('roundResult', {
-                    votes: votesWithNicknames,
-                    impostor: impostor,
-                    scores: game.players.map(p => ({
-                        id: p.id,
-                        nickname: p.nickname,
-                        score: p.score,
-                        playerCardId: p.playerCardId
-                    }))
-                })
+                votes: game.votes, // już zawierają nicki
+                impostor: impostorNickname,
+                scores: game.players.map(p => ({
+                    nickname: p.nickname,
+                    score: p.score,
+                    playerCardId: p.playerCardId
+                }))
+            });
             };
         });
 

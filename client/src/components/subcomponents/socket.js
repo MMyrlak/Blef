@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const socket = io.connect('http://192.168.100.119:3001', {
+const socket = io.connect(process.env.REACT_APP_BACKEND_IP, {
   secure: true,
   transports: ['websocket']
 });

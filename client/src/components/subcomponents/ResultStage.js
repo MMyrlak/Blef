@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../style/ResultStage.css'
 import socket from './socket';
-const ResultStage = ({ result: propResult, lobbyId }) => {
 
+const ResultStage = ({ result: propResult, lobbyId }) => {
   const defaultResult = { scores: [], votes: [], impostor: null };
   const [result, setResult] = useState(propResult || defaultResult);
   const [isLoading, setIsLoading] = useState(true);
@@ -10,15 +10,13 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
   const [flippedCards, setFlippedCards] = useState({});
 
   useEffect(() => {
-    // Jeśli dane są przekazane w props, użyj ich
     if (propResult) {
       setResult(propResult);
       setIsLoading(false);
       return;
     }
 
-    // Jeśli nie ma danych w props, spróbuj pobrać z localStorage
-     const savedData = localStorage.getItem('resultData');
+    const savedData = localStorage.getItem('resultData');
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -38,8 +36,9 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
     }));
   };
 
-  const getPlayerVote = (playerId) => {
-    const vote = result.votes.find(v => v.voterId === playerId);
+  const getPlayerVote = (nickname) => {
+    const vote = result.votes.find(v => v.voterNickname === nickname);
+    console.log(result.votes.find(v => v.voterNickname === nickname));
     return  vote.votedNickname;
   };
 
@@ -62,14 +61,14 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
       
       <div className="players-list">
         {result.scores.map(player => {
-          const isImpostor = player.id === result.impostor;
-          const voteText = getPlayerVote(player.id);
-          const isFlipped = flippedCards[player.id];
+          const isImpostor = player.nickname === result.impostor;
+          const voteText = getPlayerVote(player.nickname);
+          const isFlipped = flippedCards[player.nickname];
           return (
             <div 
-              key={player.id} 
+              key={player.nickname} 
               className={`card-container ${isFlipped ? 'flipped' : ''} ${isImpostor ? 'impostor' : ''}`}
-              onClick={() => toggleCard(player.id)}
+              onClick={() => toggleCard(player.nickname)}
             >
               <div className="card">
                 <div className="card-front">

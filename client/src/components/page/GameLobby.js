@@ -25,7 +25,8 @@ function GameLobby() {
   const { lobbyId } = useParams();
   const location = useLocation();
   const state = location.state || getLocalStorageData();
-  const {nickname, lobbyId: stateLobbyId } = state;
+  const nickname = state.nickname;
+  const storedLobbyId = state.lobbyId;
   const [players, setPlayers] = useState([]);
   const [me, setMe] = useState(null);
   const navigate = useNavigate();
@@ -36,12 +37,19 @@ function GameLobby() {
   const [question, setQuestion] = useState();
   const [answer, setAnswer] = useState([]);
   const [roundResult, setRoundResult] = useState(null);
+  const [temp, setTemp] = useState(false);
   useEffect( () => {
-    if (!nickname || stateLobbyId !== lobbyId) {
+    if (!nickname || storedLobbyId !== lobbyId) {
       navigate('/', {replace: true})
       return;
     }
-
+    const savedData = getLocalStorageData();
+    if (savedData.nickname && savedData.lobbyId) {
+      socket.emit('joinLobby', {
+        nickname: savedData.nickname,
+        lobbyId: savedData.lobbyId,
+      });
+    }
     socket.emit('joinLobby', {lobbyId, nickname});
 
     socket.on('playerInfo', playerObj => {
@@ -77,7 +85,7 @@ function GameLobby() {
       socket.off('playerUpdate');
       socket.off('disconnect');
     };
-  }, [nickname, stateLobbyId, lobbyId, navigate])
+  }, [nickname, storedLobbyId, lobbyId, navigate])
 
   useEffect(() => {
     const handleStageUpdate = (gameStage) => {
@@ -98,21 +106,67 @@ function GameLobby() {
   const handleGameStart = () => {
     socket.on('connection', (socket) => {
     console.log('User connected: ', socket.id);
-  });
+    setTemp(!false);
+    });
     socket.emit('startRound', {lobbyId} );
     socket.on('stageUpdate', gameStage => {
       setGameStage(gameStage);
     })
   }
+
+
   const handleInviteLink = () => {
-    const ipAddres = "localhost:3000";
-    // const ipAddres = "192.168.100.119:3000";
-    navigator.clipboard.writeText(`http://${ipAddres}/getIn/${lobbyId}`);
-    toaster.create({
-      title: "Link skopiowany",
-      type: "info"
+    
+  const ipAddress = process.env.REACT_APP_IP_ADDRES; 
+  const inviteLink = `${ipAddress}/getIn/${lobbyId}`;
+
+  // Fallback-friendly copy method
+  const copyToClipboard = (text) => {
+    // Method 1: Modern Clipboard API
+    if (navigator.clipboard?.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    
+    // Method 2: Legacy textarea method
+    return new Promise((resolve, reject) => {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; // Hide off-screen
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        // Legacy browser support
+        const success = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        
+        success ? resolve() : reject(new Error("Copy failed"));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
+  // Usage with error handling
+  copyToClipboard(inviteLink)
+    .then(() => {
+      toaster.create({
+        title: "Link skopiowany",
+        type: "info"
+      });
     })
-  }
+    .catch((err) => {
+      console.error("Copy failed:", err);
+      // Optional: Show error notification
+      toaster.create({
+        title: "Błąd kopiowania",
+        description: "Skopiuj link ręcznie: " + inviteLink,
+        type: "error"
+      });
+    });
+};
+
+
   if (!me) {
     return (
       <p> Łącznie z lobby...</p>

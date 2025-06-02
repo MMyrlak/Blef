@@ -33,9 +33,10 @@ function VotingStage( { question, answer, lobbyId } ) {
   });
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
 
-  const handleSelect = (playerId) => {
-    setSelectedPlayerId(playerId);
-    socket.emit('sendVote', {lobbyId, votedId: playerId});
+  const handleSelect = (nickname) => {
+    setSelectedPlayerId(nickname);
+    console.log(nickname);
+    socket.emit('sendVote', {lobbyId, votedNickname: nickname});
   }
 
   return (
@@ -47,8 +48,8 @@ function VotingStage( { question, answer, lobbyId } ) {
       {localAnswer.map( a => (
         <div 
           key={a.playerId}
-          className={`answerCard ${selectedPlayerId === a.playerId ? 'selected' : ''}`}
-          onClick={() => handleSelect(a.playerId)} > 
+          className={`answerCard ${selectedPlayerId === a.nickname ? 'selected' : ''}`}
+          onClick={() => handleSelect(a.nickname)} > 
             <h1 className='answer fonts'>{a.playerAnswer}</h1> 
             <h1 className='nickname robot'> {a.nickname}</h1> 
         </div>
