@@ -4,7 +4,6 @@ import { Button } from "@chakra-ui/react"
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@chakra-ui/react';
 import axios from 'axios';
-import LobbySlider from '../subcomponents/LobbySlider';
 import { LightMode } from '../ui/color-mode';
 import posterArt from '../img/PosterART.png'
 
@@ -53,9 +52,6 @@ function GetLobby() {
             <Button variant="outline" className='fonts' onClick={handleCreateLobby}> Zacznij grę </Button>
             </div>
           </div>
-        </div>
-        <div className='LobbyCointainer-right'>
-          <LobbySlider />
         </div>
       </div>
     </LightMode>

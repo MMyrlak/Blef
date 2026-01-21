@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@chakra-ui/react"
 import { Input } from '@chakra-ui/react';
-import LobbySlider from '../subcomponents/LobbySlider';
 import { LightMode } from '../ui/color-mode';
 import posterArt from '../img/PosterART.png'
 
@@ -44,9 +43,6 @@ return (
             <Button variant="outline" className='fonts' onClick={handleGetInLobby}> Dołącz do stołu </Button>
             </div>
           </div>
-        </div>
-        <div className='LobbyCointainer-right'>
-          <LobbySlider />
         </div>
       </div>
     </LightMode>
