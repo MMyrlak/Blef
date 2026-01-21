@@ -25,10 +25,12 @@
   position: relative;
   width: 100%;
   height: 100%;
-  transform-style: preserve_3d; /* Ważne dla FF */
-  will-change: transform;
+  /* POPRAWKA: Zmieniono preserve_3d na preserve-3d */
+  transform-style: preserve-3d; 
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  will-change: transform;
 }
 
 .card-container.flipped .card {
@@ -36,20 +38,26 @@
 }
 
 .card-front, .card-back {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  /* Wymagane dla stabilności w Firefox/Samsung */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; 
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .card-front {
   z-index: 2;
+  /* Dodaj to, aby Firefox wiedział, że to punkt zero */
+  transform: rotateY(0deg); 
 }
 
 .card-back {
+  /* Tył karty musi być obrócony o 180 stopni na starcie */
   transform: rotateY(180deg);
   display: flex;
   align-items: center;
@@ -57,6 +65,7 @@
   background-image: url('../img/CardBackBG.png');
   background-size: 100% 100%;
   background-position: center;
+  z-index: 1;
 }
 
 .player-card {

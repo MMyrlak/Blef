@@ -18,39 +18,43 @@ function GameLobby() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Stan gry
   const [players, setPlayers] = useState([]);
   const [me, setMe] = useState(null);
   const [gameStage, setGameStage] = useState('lobby');
   
-  // Dane rundy
   const [question, setQuestion] = useState(null);
   const [questionForAll, setQuestionForAll] = useState(null);
   const [answer, setAnswer] = useState([]);
   const [roundResult, setRoundResult] = useState(null);
-
-  // Liczniki aktywności
   const [answeredCount, setAnsweredCount] = useState(0);
   const [votedCount, setVotedCount] = useState(0);
 
   useEffect(() => {
-    const state = location.state || {};
-    const nickname = state.nickname;
+    const stateNickname = location.state?.nickname;
+    const storedData = JSON.parse(localStorage.getItem('lobbyData') || '{}');
+    const nickname = stateNickname || (storedData.lobbyId === lobbyId ? storedData.nickname : null);
 
     if (!nickname) {
       navigate('/', { replace: true });
       return;
     }
 
-    // Prośba o aktualny stan po wejściu/odświeżeniu
+    localStorage.setItem('lobbyData', JSON.stringify({ lobbyId, nickname }));
+
     socket.emit('joinLobby', { lobbyId, nickname });
     socket.emit('getGameState', { lobbyId });
 
-    socket.on('playerInfo', playerObj => setMe(playerObj));
-    socket.on('playerUpdate', setPlayers);
+    socket.on('playerInfo', playerObj => {
+        setMe(playerObj);
+    });
+
+    socket.on('playerUpdate', (updatedPlayers) => {
+        setPlayers(updatedPlayers);
+    });
     
     socket.on('stageUpdate', stage => {
       setGameStage(stage);
+
       if (stage === 'lobby') {
         setAnsweredCount(0);
         setVotedCount(0);
@@ -59,11 +63,11 @@ function GameLobby() {
 
     socket.on('giveQuestion', q => setQuestion(q));
     socket.on('giveQuestions', q => setQuestionForAll(q.questionForAll));
-    
+
     socket.on('startVoting', data => {
       setAnswer(data);
       // Licznik głosów resetuje się przy starcie głosowania
-      setVotedCount(0); 
+      setVotedCount(0);
     });
 
     socket.on('roundResult', setRoundResult);
@@ -74,12 +78,15 @@ function GameLobby() {
       setVotedCount(data.votedCount || 0);
     });
 
-    // Obsługa odzyskiwania stanu
+
     socket.on('gameStateRecovered', data => {
       setGameStage(data.stage);
       setAnsweredCount(data.answeredCount);
       setVotedCount(data.votedCount);
-      if (data.answers) setAnswer({ answers: data.answers });
+      
+      if (data.question) setQuestion(data.question);
+      
+      if (data.answers) setAnswer(data.answers);
       if (data.roundResult) setRoundResult(data.roundResult);
     });
 
@@ -89,6 +96,10 @@ function GameLobby() {
       socket.off('stageUpdate');
       socket.off('playerActionUpdate');
       socket.off('gameStateRecovered');
+      socket.off('giveQuestion');
+      socket.off('giveQuestions');
+      socket.off('startVoting');
+      socket.off('roundResult');
     };
   }, [lobbyId, location.state, navigate]);
 
@@ -103,12 +114,60 @@ function GameLobby() {
   };
 
   const handleInviteLink = () => {
-    const inviteLink = `${window.location.origin}/getIn/${lobbyId}`;
-    navigator.clipboard.writeText(inviteLink).then(() => {
-      toaster.create({ title: "Link skopiowany", type: "info" });
-    });
-  };
+    // Pobieramy adres z .env lub aktualnego adresu przeglądarki jako fallback
+    const baseUrl = "http://192.168.100.2:3000"
+    const inviteLink = `${baseUrl}/getIn/${lobbyId}`;
 
+    // Funkcja kopiująca działająca wszędzie (nawet bez HTTPS)
+    const copyToClipboard = (text) => {
+      // Próba użycia nowoczesnego API (tylko HTTPS/Localhost)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+
+      // Rezerwowa metoda dla HTTP (Stary sposób z textarea)
+      return new Promise((resolve, reject) => {
+        try {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          
+          // Ustawiamy textarea poza ekranem
+          textArea.style.position = "fixed";
+          textArea.style.left = "-9999px";
+          textArea.style.top = "0";
+          document.body.appendChild(textArea);
+          
+          textArea.focus();
+          textArea.select();
+          
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          if (successful) resolve();
+          else reject(new Error("Nie udało się skopiować"));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    };
+
+    // Wykonanie kopiowania
+    copyToClipboard(inviteLink)
+      .then(() => {
+        toaster.create({
+          title: "Link skopiowany do schowka!",
+          type: "success"
+        });
+      })
+      .catch((err) => {
+        console.error("Błąd kopiowania:", err);
+        toaster.create({
+          title: "Błąd kopiowania",
+          description: "Skopiuj link ręcznie z paska adresu",
+          type: "error"
+        });
+      });
+  };
   if (!me) return <p className="fonts" style={{textAlign: 'center', marginTop: '20%'}}>Łączenie z saloonem...</p>;
 
   return (

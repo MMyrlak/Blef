@@ -1,43 +1,31 @@
 import '../style/VotingStage.css';
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import socket from './socket';
 
-function VotingStage( { question, answer, lobbyId } ) {
-  const [localQuestion, setLocalQuestion] = useState(() => {
-    if (question) return question;
-    try {
-      const stored = localStorage.getItem('questionData');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.question.question || null;
-      }
-    } catch (e) {
-      console.error('Błąd przy ładowaniu question z localStorage:', e);
-    }
-    return null;
-  });
-  const [localAnswer, setLocalAnswer] = useState(() => {
-    if (answer?.answers && Array.isArray(answer.answers)) {
-      return answer.answers; // z propsów: wyciągnij answers
-    }
-    try {
-      const stored = localStorage.getItem('votingData');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return Array.isArray(parsed.answer?.answers) ? parsed.answer.answers : [];
-      }
-    } catch (e) {
-      console.error('Błąd przy ładowaniu answer z localStorage:', e);
-    }
-    return [];
-  });
+function VotingStage({ question, answer, lobbyId }) {
+  // Inicjalizacja może zostać, ale dodajemy useEffect poniżej
+  const [localQuestion, setLocalQuestion] = useState(question || null);
+  const [localAnswer, setLocalAnswer] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+
+  // Synchronizacja z propsami (kluczowe po odświeżeniu strony)
+  useEffect(() => {
+    if (question) setLocalQuestion(question);
+  }, [question]);
+
+  useEffect(() => {
+    // Sprawdzamy różne formaty danych, które mogą przyjść z serwera
+    if (Array.isArray(answer)) {
+      setLocalAnswer(answer);
+    } else if (answer?.answers && Array.isArray(answer.answers)) {
+      setLocalAnswer(answer.answers);
+    }
+  }, [answer]);
 
   const handleSelect = (nickname) => {
     setSelectedPlayerId(nickname);
-    console.log(nickname);
-    socket.emit('sendVote', {lobbyId, votedNickname: nickname});
-  }
+    socket.emit('sendVote', { lobbyId, votedNickname: nickname });
+  };
 
   return (
     <div className='votingLobby'>
@@ -45,14 +33,15 @@ function VotingStage( { question, answer, lobbyId } ) {
         <h1 className='fonts'> {localQuestion} </h1>
       </div>
       <div className='playersAnswers'>
-      {localAnswer.map( a => (
-        <div 
-          key={a.playerId}
-          className={`answerCard ${selectedPlayerId === a.nickname ? 'selected' : ''}`}
-          onClick={() => handleSelect(a.nickname)} > 
+        {localAnswer.map(a => (
+          <div 
+            key={a.nickname} // Nickname jest stały, id socketu nie!
+            className={`answerCard ${selectedPlayerId === a.nickname ? 'selected' : ''}`}
+            onClick={() => handleSelect(a.nickname)} 
+          > 
             <h1 className='answer fonts'>{a.playerAnswer}</h1> 
-            <h1 className='nickname robot'> {a.nickname}</h1> 
-        </div>
+            <h1 className='nickname robot'>{a.nickname}</h1> 
+          </div>
         ))}
       </div>
     </div>

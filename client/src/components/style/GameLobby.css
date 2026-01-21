@@ -41,29 +41,30 @@
     
 }
 
-.header{
+.header {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 12px;
     font-weight: bold;
+
+    /* 1. Definicja gradientu złota */
     background-image: linear-gradient(
-	to right,
-	#462523 0,
-    #cb9b51 22%, 
-	#f6e27a 45%,
-	#f6f2c0 50%,
-	#f6e27a 55%,
-	#cb9b51 78%,
-	#462523 100%
-	);
-   color: #f6e27a;
-   text-shadow: 
-        -1px -1px 0 #000,  
-         1px -1px 0 #000,
-        -1px  1px 0 #000,
-         1px  1px 0 #000,
-         2px  2px 5px rgba(0,0,0,0.5);
+        to right,
+        #462523 0,
+        #cb9b51 25%, 
+        #f6e27a 50%,
+        #cb9b51 75%,
+        #462523 100%
+    );
+
+    /* 2. Wycięcie gradientu do kształtu liter (standardowe + prefix) */
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    /* 3. Uczynienie samego koloru tekstu przezroczystym, aby pokazać tło (gradient) */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .GameLobby-Card{
