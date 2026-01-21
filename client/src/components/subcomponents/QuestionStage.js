@@ -39,19 +39,15 @@ function QuestionStage( { question, lobbyId } ) {
   }, [localQuestion]);
 
     const handleSendAnswer = () => {
-    setAnswerSend(true);
-      if (answer !== null) {
-      socket.emit('sendAnswer', {
+    // Nie blokuj przycisku na stałe, pozwól na "poprawkę"
+    socket.emit('sendAnswer', {
         lobbyId,
         playerAnswer: answer.trim(),
-      });
-    } else {
-      toaster.create({
-        title: "Wpisz odpowiedź",
-        type: "warning"
-      })
-    }
-  }
+    });
+    setAnswerSend(true)
+    toaster.create({ title: "Odpowiedź wysłana/zaktualizowana", type: "success" });
+    };
+    
   return (
     <div className={`questionCard ${answerSend ? 'sended' : null}`}> 
     <Toaster />

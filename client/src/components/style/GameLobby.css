@@ -57,9 +57,13 @@
 	#cb9b51 78%,
 	#462523 100%
 	);
-   color:transparent;
-   -webkit-background-clip:text;
-  -webkit-text-stroke: 0.1px black;
+   color: #f6e27a;
+   text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         2px  2px 5px rgba(0,0,0,0.5);
 }
 
 .GameLobby-Card{
