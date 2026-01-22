@@ -12,28 +12,26 @@ function GetLobby() {
   const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const handleCreateLobby = async () => {
-        if(!nickname.trim()) {
-          setError('Podaj nick');
-          return;
-        }
-        if(nickname.length > 13){
-          setError('Nick za długi, maksymalnie 13 znaków');
-          return;
-        }
-        setError(null);
+      const handleCreateLobby = async () => {
+      // AUTOMATYCZNE WYKRYWANIE ADRESU BACKENDU
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname.includes('192.168');
+      
+      // Jeśli lokalnie, użyj portu 3001. Jeśli na serwerze, użyj adresu z Rendera.
+      const BACKEND_URL = isLocal 
+        ? `http://${window.location.hostname}:3001` 
+        : "https://twoja-nazwa-na-render.onrender.com";
 
-        try {
-          const res = await axios.post(`${process.env.REACT_APP_BACKEND_IP}/api/lobby/create`, {
-            name: nickname
+      try {
+          // Teraz URL będzie wyglądał poprawnie: http://192.168.100.2:3001/api/lobby/create
+          const res = await axios.post(`${BACKEND_URL}/api/lobby/create`, {
+              nickname: nickname
           });
           const {lobbyId} = res.data;
           navigate(`/lobby/${lobbyId}`, {state: {nickname, lobbyId} });
-        } catch (err) {
-           console.error(err);
-           setError(err.response?.data?.error || "Błąd serwera Front");
-        }
-    }
+        } catch (error) {
+        console.error("Błąd podczas tworzenia lobby:", error);
+          }
+      };
   return (
     <LightMode>
       <div className='LobbyCointainer'>
