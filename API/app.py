@@ -37,5 +37,5 @@ register_game_sockets(socketio)
 if __name__ == '__main__':
     init_db()
     port = int(os.getenv('PORT', 3001))
-    # Używamy socketio.run zamiast uvicorn
-    socketio.run(app, host='0.0.0.0', port=port, debug=True)
+    port = int(os.environ.get("PORT", 3001))
+    socketio.run(app, host='0.0.0.0', port=port)
