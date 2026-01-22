@@ -9,7 +9,6 @@ import posterArt from '../img/PosterART.png'
 
 function GetLobby() {
   const [nickname, setNickname] = useState('');
-  const [error, setError] = useState(null);
     const navigate = useNavigate();
 
       const handleCreateLobby = async () => {
@@ -41,7 +40,6 @@ function GetLobby() {
             <img src={posterArt} alt='Poster'/>
             <div className='Body'>
             <div className='Body-Input-Container'>
-            {error && <p className='Error'>{error}</p>}
             <Input className='Body-Input fonts' placeholder='Podaj nick' variant="flushed" value={nickname} onChange={e => setNickname(e.target.value)}></Input>
             </div>
             <Button variant="outline" className='fonts' onClick={handleCreateLobby}> Zacznij grę </Button>

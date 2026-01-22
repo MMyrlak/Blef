@@ -1,7 +1,7 @@
 import '../style/GameLobby.css';
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Icon, Badge, Flex } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { Toaster, toaster } from "../ui/toaster";
 import { FiLink, FiXCircle } from "react-icons/fi";
 import { GiSawedOffShotgun } from "react-icons/gi";
