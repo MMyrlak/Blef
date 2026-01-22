@@ -66,13 +66,11 @@ function GameLobby() {
 
     socket.on('startVoting', data => {
       setAnswer(data);
-      // Licznik głosów resetuje się przy starcie głosowania
       setVotedCount(0);
     });
 
     socket.on('roundResult', setRoundResult);
 
-    // Aktualizacja liczników "na żywo"
     socket.on('playerActionUpdate', data => {
       setAnsweredCount(data.answeredCount || 0);
       setVotedCount(data.votedCount || 0);
@@ -114,24 +112,19 @@ function GameLobby() {
   };
 
   const handleInviteLink = () => {
-    // Pobieramy adres z .env lub aktualnego adresu przeglądarki jako fallback
     const baseUrl = "http://192.168.100.2:3000"
     const inviteLink = `${baseUrl}/getIn/${lobbyId}`;
 
-    // Funkcja kopiująca działająca wszędzie (nawet bez HTTPS)
     const copyToClipboard = (text) => {
-      // Próba użycia nowoczesnego API (tylko HTTPS/Localhost)
       if (navigator.clipboard && navigator.clipboard.writeText) {
         return navigator.clipboard.writeText(text);
       }
 
-      // Rezerwowa metoda dla HTTP (Stary sposób z textarea)
       return new Promise((resolve, reject) => {
         try {
           const textArea = document.createElement("textarea");
           textArea.value = text;
           
-          // Ustawiamy textarea poza ekranem
           textArea.style.position = "fixed";
           textArea.style.left = "-9999px";
           textArea.style.top = "0";
@@ -151,7 +144,6 @@ function GameLobby() {
       });
     };
 
-    // Wykonanie kopiowania
     copyToClipboard(inviteLink)
       .then(() => {
         toaster.create({
@@ -177,36 +169,43 @@ function GameLobby() {
         <div className='GameLobby-Body'>
           <div className='GameLobby-Header'>
             {me.isHost && gameStage === 'lobby' ? (
-              <>
-                <Button size="lg" onClick={handleInviteLink} className='inviteButton'>
-                  Zaproś <Icon><FiLink /></Icon>
+              <div className="lobby-actions">
+                <Button size="sm" onClick={handleInviteLink} className='inviteButton'>
+                  Zaproś <FiLink />
                 </Button>
-                <h1 className='fonts header'>Saloon Złotego Węża</h1>
-                <Button size="lg" onClick={handleGameStart} className='startButton'>
-                  Pojedynek! <Icon><GiSawedOffShotgun /></Icon>
-                </Button>
-              </>
-            ) : (
-              <Flex align="center" gap={4}>
-                {me.isHost && gameStage !== 'lobby' && (
-                  <Button size="sm" colorPalette="red" variant="ghost" onClick={handleCancelRound}>
-                    <FiXCircle /> Anuluj
-                  </Button>
-                )}
+                
                 <h1 className='fonts header'>Saloon Złotego Węża</h1>
                 
-                {/* Liczniki widoczne dla wszystkich */}
-                {gameStage === 'question' && (
-                  <Badge colorPalette="blue" size="lg" variant="surface">
-                    Gotowe: {answeredCount} / {players.length}
-                  </Badge>
-                )}
-                {gameStage === 'vote' && (
-                  <Badge colorPalette="orange" size="lg" variant="surface">
-                    Głosy: {votedCount} / {players.length}
-                  </Badge>
-                )}
-              </Flex>
+                <Button size="sm" onClick={handleGameStart} className='startButton'>
+                  Pojedynek! <GiSawedOffShotgun />
+                </Button>
+              </div>
+            ) : (
+              <div className="game-status-container">
+                {/* Środkowy Tytuł */}
+                <h1 className='fonts header'>Saloon Złotego Węża</h1>
+
+                {/* Kontener na przyciski/statusy - na mobile będą jeden pod drugim */}
+                <div className="status-stack">
+                  {me.isHost && gameStage !== 'lobby' && (
+                    <Button size="xs" variant="ghost" onClick={handleCancelRound} className="cancelButton">
+                      <FiXCircle /> Anuluj rundę
+                    </Button>
+                  )}
+
+                  {gameStage === 'question' && (
+                    <div className="statusBadge question">
+                      Gotowe: {answeredCount}/{players.length}
+                    </div>
+                  )}
+                  
+                  {gameStage === 'vote' && (
+                    <div className="statusBadge vote">
+                      Głosy: {votedCount}/{players.length}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 

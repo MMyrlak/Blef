@@ -12,6 +12,7 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
   useEffect(() => {
     if (propResult) {
       setResult(propResult);
+      localStorage.setItem('resultData', JSON.stringify(propResult)); // Zapisujemy dla bezpieczeństwa
       setIsLoading(false);
       return;
     }
@@ -28,7 +29,6 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
     setIsLoading(false);
   }, [propResult]);
 
-
   const toggleCard = (playerId) => {
     setFlippedCards(prev => ({
       ...prev,
@@ -36,34 +36,39 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
     }));
   };
 
+  // --- KLUCZOWA POPRAWKA TUTAJ ---
   const getPlayerVote = (nickname) => {
+    // Sprawdzamy czy result.votes w ogóle istnieje (bezpieczeństwo)
+    if (!result.votes) return "Brak głosu";
+
     const vote = result.votes.find(v => v.voterNickname === nickname);
-    console.log(result.votes.find(v => v.voterNickname === nickname));
-    return  vote.votedNickname;
+    
+    // Jeśli vote jest undefined (gracz nie głosował), zwracamy informację zamiast błędu
+    return vote ? vote.votedNickname : "Brak głosu";
   };
 
   if (isLoading || !result || !Array.isArray(result.scores)) {
     return (
       <div className="result-container">
-        <h2>Trwa ładowanie wyników...</h2>
+        <h2 className='fonts'>Trwa ładowanie wyników...</h2>
       </div>
     );
   }
 
-
   const handleReady = () => {
-    setReady(!ready);
-    socket.emit('nextRoundReady', {lobbyId})
+    const newReadyState = !ready;
+    setReady(newReadyState);
+    socket.emit('nextRoundReady', { lobbyId });
   }
   
   return (
     <div className="result-container">
-      
       <div className="players-list">
         {result.scores.map(player => {
           const isImpostor = player.nickname === result.impostor;
-          const voteText = getPlayerVote(player.nickname);
+          const voteText = getPlayerVote(player.nickname); // Teraz bezpieczne
           const isFlipped = flippedCards[player.nickname];
+
           return (
             <div 
               key={player.nickname} 
@@ -88,29 +93,32 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
                 </div>
               
                 <div className="card-back">
-                  <div 
-                    className="player-card"
-                  >
+                  <div className="player-card">
                     <div className='cardHeader fonts'>
                       <h1>{player.nickname}</h1>
                     </div>
-                    {isImpostor ? (
-                      <p>
-                        <span className={`vote-text fonts`}>
-                          Oszust
-                        </span>
-                      </p>
-                    ) : (<p>
-                        Głos na: <br/>
-                        <span className={`vote-text fonts`}>
-                          {voteText}
-                        </span>
-                      </p>)
-                      }                      
-                      <div className='cardFooter'>
-                        <h1>{player.score}</h1>
-                      </div>
+                    
+                    <div className='vote-info'>
+                      {isImpostor ? (
+                        <p>
+                          <span className={`vote-text fonts impostor-label`}>
+                            Oszust
+                          </span>
+                        </p>
+                      ) : (
+                        <p>
+                          Głos na: <br/>
+                          <span className={`vote-text fonts`}>
+                            {voteText}
+                          </span>
+                        </p>
+                      )}
                     </div>
+
+                    <div className='cardFooter'>
+                      <h1>{player.score}</h1>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -124,7 +132,7 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
           className={`western-ready-button ${ready ? "notReady" : "ready"}`}
         >
           <div className="sign-board">
-            <div className="sign-text">
+            <div className="sign-text fonts">
               {ready ? 'Nie gotowy' : 'Gotowy!'}
             </div>
           </div>

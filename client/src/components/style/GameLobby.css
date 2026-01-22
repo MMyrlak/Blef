@@ -35,36 +35,102 @@
     margin-bottom: 1.5%;
     background-color: rgba(255,255,255, 0.3);
 }
-.GameLobby-Header h1{
-    font-size: 53px;
-    margin: -19px auto;
-    
+/* GŁÓWNY KONTENER NAGŁÓWKA */
+.GameLobby-Header {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #d4a373, #a98467);
+    border: 4px solid #4a3728;
+    border-radius: 15px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
 }
 
-.header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    font-weight: bold;
-
-    /* 1. Definicja gradientu złota */
+.GameLobby-Header .header {
+    font-size: clamp(28px, 5vw, 53px); 
+    margin: 10px auto; 
+    text-align: center;
+    line-height: 1.2;
     background-image: linear-gradient(
         to right,
         #462523 0,
-        #cb9b51 25%, 
+        #cb9b51 25%,
         #f6e27a 50%,
         #cb9b51 75%,
         #462523 100%
     );
 
-    /* 2. Wycięcie gradientu do kształtu liter (standardowe + prefix) */
     -webkit-background-clip: text;
     background-clip: text;
-
-    /* 3. Uczynienie samego koloru tekstu przezroczystym, aby pokazać tło (gradient) */
     -webkit-text-fill-color: transparent;
     color: transparent;
+}
+
+.game-status-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+.status-stack {
+    display: flex;
+    flex-direction: column; /* Jeden pod drugim */
+    align-items: flex-end; /* Wyrównanie do prawej */
+    gap: 8px;
+}
+
+/* STYLIZACJA STATUS BADGE - "WYPALONA SKÓRA" */
+.statusBadge {
+    background-color: #4a2e1e;
+    color: #f6e27a; /* Złoty tekst */
+    padding: 6px 12px;
+    border: 2px solid #cb9b51;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    white-space: nowrap;
+}
+
+.statusBadge.question { border-color: #cb9b51; }
+.statusBadge.vote { border-color: #f6e27a; }
+
+/* STYLIZACJA PRZYCISKU ANULUJ */
+.cancelButton {
+    color: #ff4d4d !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px black;
+    height: auto !important;
+    padding: 2px 5px !important;
+}
+.lobby-actions{
+    width: 90%;
+    align-items: center;
+    justify-content: space-evenly;
+    display: flex;
+    flex-direction: row;
+}
+@media (max-width: 600px) {
+    .game-status-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .status-stack {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .GameLobby-Header .header {
+        margin: 5px 0;
+    }
 }
 
 .GameLobby-Card{
@@ -106,12 +172,12 @@
         padding-bottom: 120px;
     }
     .startButton, .inviteButton{
-        position: fixed; /* Zmiana z absolute na fixed */
+        position: fixed;
         z-index: 100;
         left: 50%;
         transform: translateX(-50%);
         width: 80%;
-        transition: bottom 0.3s ease; /* Animacja dla płynnego przesuwania */
+        transition: bottom 0.3s ease;
     }
     .startButton {
         bottom: 95px;
