@@ -13,16 +13,13 @@ function GetLobby() {
     const navigate = useNavigate();
 
       const handleCreateLobby = async () => {
-      // AUTOMATYCZNE WYKRYWANIE ADRESU BACKENDU
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname.includes('192.168');
       
-      // Jeśli lokalnie, użyj portu 3001. Jeśli na serwerze, użyj adresu z Rendera.
       const BACKEND_URL = isLocal 
         ? `http://${window.location.hostname}:3001` 
         : "https://twoja-nazwa-na-render.onrender.com";
 
       try {
-          // Teraz URL będzie wyglądał poprawnie: http://192.168.100.2:3001/api/lobby/create
           const res = await axios.post(`${BACKEND_URL}/api/lobby/create`, {
               nickname: nickname
           });

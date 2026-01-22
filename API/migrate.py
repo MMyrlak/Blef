@@ -15,7 +15,6 @@ def migrate():
 
     print("Przygotowywanie struktury bazy danych...")
     
-    # 1. Tabela question_pairs
     cursor.execute('DROP TABLE IF EXISTS question_pairs')
     cursor.execute('''
         CREATE TABLE question_pairs (
@@ -26,7 +25,6 @@ def migrate():
         )
     ''')
 
-    # 2. Tabela lobbies
     cursor.execute('DROP TABLE IF EXISTS lobbies')
     cursor.execute('''
         CREATE TABLE lobbies (
@@ -39,7 +37,6 @@ def migrate():
     with open(sql_file, 'r', encoding='utf-8') as f:
         content = f.read()
         
-        # --- MIGRACJA QUESTION_PAIRS ---
         print("Przetwarzanie pytań...")
         q_pattern = re.compile(
             r"INSERT INTO `question_pairs` \(`id`, `pair_id`, `question`, `for_impostor`\) VALUES\s*(.*?);", 
@@ -56,7 +53,6 @@ def migrate():
                 )
             print(f"Pomyślnie przeniesiono {len(q_records)} pytań.")
 
-        # --- MIGRACJA LOBBIES ---
         print("Przetwarzanie lobby...")
         l_pattern = re.compile(
             r"INSERT INTO `lobbies` \(`id`, `created_at`, `isOpen`\) VALUES\s*(.*?);", 
@@ -64,7 +60,6 @@ def migrate():
         )
         l_match = l_pattern.search(content)
         if l_match:
-            # POPRAWKA: Ucieczka myślnika w klasie znaków dla daty: [\d\- :]+
             l_records = re.findall(r"\('([a-f0-9\-]+)',\s*'([\d\- :]+)',\s*(\d+)\)", l_match.group(1))
             for rec in l_records:
                 l_id, l_date, l_open = rec

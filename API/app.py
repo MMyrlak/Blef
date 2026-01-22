@@ -23,15 +23,12 @@ CORS(app, resources={r"/*": {
 
 socketio = SocketIO(app, cors_allowed_origins=cors_origin)
 
-# Dodaj tę trasę, aby uniknąć 404 na stronie głównej
 @app.route('/')
 def health_check():
     return jsonify({"status": "Saloon is open!", "version": "1.0.0"})
 
-# Rejestracja tras API
 app.register_blueprint(lobby_bp, url_prefix='/api/lobby')
 
-# Rejestracja zdarzeń Socket.io
 register_game_sockets(socketio)
 
 if __name__ == '__main__':
