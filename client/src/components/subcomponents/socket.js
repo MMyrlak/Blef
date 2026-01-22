@@ -1,8 +1,14 @@
 import { io } from 'socket.io-client';
 
-const socket = io.connect(process.env.REACT_APP_BACKEND_IP, {
-  secure: true,
-  transports: ['websocket']
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname.includes('192.168');
+
+const BACKEND_URL = isLocal 
+  ? `http://${window.location.hostname}:3001` 
+  : "https://twoja-nazwa-na-render.onrender.com"; 
+
+const socket = io(BACKEND_URL, {
+  transports: ['websocket'],
+  secure: !isLocal 
 });
 
 export default socket;

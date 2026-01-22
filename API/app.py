@@ -13,8 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# POPRAWKA CORS: Dodajemy fallback '*', jeśli zmienna w .env nie zostanie znaleziona
-cors_origin = os.getenv('CORS_ORIGIN', '*') 
+cors_origin = ["http://localhost:3000", "https://twoja-gra.vercel.app", "http://192.168.100.2:3000"]
 
 CORS(app, resources={r"/*": {
     "origins": cors_origin,

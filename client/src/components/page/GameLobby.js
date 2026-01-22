@@ -112,54 +112,56 @@ function GameLobby() {
   };
 
   const handleInviteLink = () => {
-    const baseUrl = "http://192.168.100.2:3000"
-    const inviteLink = `${baseUrl}/getIn/${lobbyId}`;
 
-    const copyToClipboard = (text) => {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text);
+  const baseUrl = window.location.origin;
+  const inviteLink = `${baseUrl}/getIn/${lobbyId}`;
+
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) resolve();
+        else reject(new Error("Nie udało się skopiować"));
+      } catch (err) {
+        reject(err);
       }
-
-      return new Promise((resolve, reject) => {
-        try {
-          const textArea = document.createElement("textarea");
-          textArea.value = text;
-          
-          textArea.style.position = "fixed";
-          textArea.style.left = "-9999px";
-          textArea.style.top = "0";
-          document.body.appendChild(textArea);
-          
-          textArea.focus();
-          textArea.select();
-          
-          const successful = document.execCommand('copy');
-          document.body.removeChild(textArea);
-          
-          if (successful) resolve();
-          else reject(new Error("Nie udało się skopiować"));
-        } catch (err) {
-          reject(err);
-        }
-      });
-    };
-
-    copyToClipboard(inviteLink)
-      .then(() => {
-        toaster.create({
-          title: "Link skopiowany do schowka!",
-          type: "success"
-        });
-      })
-      .catch((err) => {
-        console.error("Błąd kopiowania:", err);
-        toaster.create({
-          title: "Błąd kopiowania",
-          description: "Skopiuj link ręcznie z paska adresu",
-          type: "error"
-        });
-      });
+    });
   };
+
+  copyToClipboard(inviteLink)
+    .then(() => {
+      toaster.create({
+        title: "Link skopiowany do schowka!",
+        description: "Wyślij go znajomym, aby dołączyli do saloonu.",
+        type: "success"
+      });
+    })
+    .catch((err) => {
+      console.error("Błąd kopiowania:", err);
+      toaster.create({
+        title: "Błąd kopiowania",
+        description: "Skopiuj link ręcznie z paska adresu przeglądarki.",
+        type: "error"
+      });
+    });
+};
   if (!me) return <p className="fonts" style={{textAlign: 'center', marginTop: '20%'}}>Łączenie z saloonem...</p>;
 
   return (
