@@ -16,7 +16,7 @@ function GetLobby() {
       
       const BACKEND_URL = isLocal 
         ? `http://${window.location.hostname}:3001` 
-        : "https://twoja-nazwa-na-render.onrender.com";
+        : "https://blef-7tj3.onrender.com";
 
       try {
           const res = await axios.post(`${BACKEND_URL}/api/lobby/create`, {
