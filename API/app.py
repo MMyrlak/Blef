@@ -31,6 +31,10 @@ app.register_blueprint(lobby_bp, url_prefix='/api/lobby')
 
 register_game_sockets(socketio)
 
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "Saloon is open!"}), 200
+
 if __name__ == '__main__':
     init_db()
     port = int(os.getenv('PORT', 3001))
