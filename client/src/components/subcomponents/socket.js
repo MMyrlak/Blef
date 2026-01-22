@@ -4,7 +4,7 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 
 const BACKEND_URL = isLocal 
   ? `http://${window.location.hostname}:3001` 
-  : "https://twoja-nazwa-na-render.onrender.com"; 
+  : "https://blef-7tj3.onrender.com"; 
 
 const socket = io(BACKEND_URL, {
   transports: ['websocket'],
