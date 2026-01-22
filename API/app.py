@@ -32,7 +32,7 @@ app.register_blueprint(lobby_bp, url_prefix='/api/lobby')
 register_game_sockets(socketio)
 
 @app.route('/health')
-def health_check():
+def saloon_health():
     return jsonify({"status": "Saloon is open!"}), 200
 
 if __name__ == '__main__':
