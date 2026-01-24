@@ -12,7 +12,7 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
   useEffect(() => {
     if (propResult) {
       setResult(propResult);
-      localStorage.setItem('resultData', JSON.stringify(propResult)); // Zapisujemy dla bezpieczeństwa
+      localStorage.setItem('resultData', JSON.stringify(propResult));
       setIsLoading(false);
       return;
     }
@@ -36,14 +36,10 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
     }));
   };
 
-  // --- KLUCZOWA POPRAWKA TUTAJ ---
   const getPlayerVote = (nickname) => {
-    // Sprawdzamy czy result.votes w ogóle istnieje (bezpieczeństwo)
     if (!result.votes) return "Brak głosu";
 
     const vote = result.votes.find(v => v.voterNickname === nickname);
-    
-    // Jeśli vote jest undefined (gracz nie głosował), zwracamy informację zamiast błędu
     return vote ? vote.votedNickname : "Brak głosu";
   };
 
@@ -66,7 +62,7 @@ const ResultStage = ({ result: propResult, lobbyId }) => {
       <div className="players-list">
         {result.scores.map(player => {
           const isImpostor = player.nickname === result.impostor;
-          const voteText = getPlayerVote(player.nickname); // Teraz bezpieczne
+          const voteText = getPlayerVote(player.nickname);
           const isFlipped = flippedCards[player.nickname];
 
           return (

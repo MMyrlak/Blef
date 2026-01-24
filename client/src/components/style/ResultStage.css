@@ -25,7 +25,6 @@
   position: relative;
   width: 100%;
   height: 100%;
-  /* POPRAWKA: Zmieniono preserve_3d na preserve-3d */
   transform-style: preserve-3d; 
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 12px;
@@ -38,7 +37,6 @@
 }
 
 .card-front, .card-back {
-  /* Wymagane dla stabilności w Firefox/Samsung */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden; 
   position: absolute;
@@ -52,12 +50,10 @@
 
 .card-front {
   z-index: 2;
-  /* Dodaj to, aby Firefox wiedział, że to punkt zero */
   transform: rotateY(0deg); 
 }
 
 .card-back {
-  /* Tył karty musi być obrócony o 180 stopni na starcie */
   transform: rotateY(180deg);
   display: flex;
   align-items: center;
@@ -99,7 +95,6 @@
   display: inline-block;
 }
 
-/* Animacja dla karty impostora */
 @keyframes impostorGlow {
   0% { box-shadow: 0 0 20px #ff6b6b; }
   50% { box-shadow: 0 0 40px #ff0000; }
@@ -184,9 +179,7 @@
     color: #a52a2a;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   }
-
-
-  /* Efekt drewna */
+  
   .sign-board::before {
     content: '';
     position: absolute;
@@ -212,7 +205,6 @@
     pointer-events: none;
   }
 
-  /* Animacja */
   @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }

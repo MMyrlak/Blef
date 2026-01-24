@@ -7,7 +7,6 @@ import textFit from 'textfit';
 
 function QuestionStage({ question, lobbyId }) {
   const [localQuestion, setLocalQuestion] = useState(question ?? null);
-  // ZMIANA: Inicjalizacja pustym ciągiem znaków zamiast null
   const [answer, setAnswer] = useState(''); 
   const [answerSend, setAnswerSend] = useState(false);
 
@@ -40,7 +39,6 @@ function QuestionStage({ question, lobbyId }) {
   }, [localQuestion]);
 
   const handleSendAnswer = () => {
-    // ZABEZPIECZENIE: Sprawdzenie czy odpowiedź nie jest pusta po usunięciu spacji
     if (!answer || answer.trim() === '') {
       toaster.create({
         title: "Wpisz odpowiedź przed zatwierdzeniem",

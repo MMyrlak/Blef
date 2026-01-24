@@ -12,11 +12,9 @@ function GetInLobby() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // 1. AUTOMATYCZNE SPRAWDZANIE PRZY WEJŚCIU
     useEffect(() => {
         const stored = JSON.parse(localStorage.getItem('lobbyData') || '{}');
         
-        // Jeśli lobbyId się zgadza i mamy zapisany nick, leć od razu do gry
         if (stored.lobbyId === lobbyId && stored.nickname) {
             navigate(`/lobby/${lobbyId}`, { 
                 state: { nickname: stored.nickname, lobbyId },
@@ -35,8 +33,6 @@ function GetInLobby() {
             return;
         }
         setError(null);
-        
-        // 2. ZAPISZ DANE, ABY NASTĘPNYM RAZEM WEJŚĆ AUTOMATYCZNIE
         localStorage.setItem('lobbyData', JSON.stringify({ lobbyId, nickname }));
 
         navigate(`/lobby/${lobbyId}`, { state: { nickname, lobbyId } });

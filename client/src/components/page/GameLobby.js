@@ -184,10 +184,7 @@ function GameLobby() {
               </div>
             ) : (
               <div className="game-status-container">
-                {/* Środkowy Tytuł */}
                 <h1 className='fonts header'>Saloon Złotego Węża</h1>
-
-                {/* Kontener na przyciski/statusy - na mobile będą jeden pod drugim */}
                 <div className="status-stack">
                   {me.isHost && gameStage !== 'lobby' && (
                     <Button size="xs" variant="ghost" onClick={handleCancelRound} className="cancelButton">
